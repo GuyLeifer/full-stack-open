@@ -1,4 +1,4 @@
-
+node_modules
 node_modules/.bin/is-ci
 node_modules/.bin/is-ci.cmd
 node_modules/.bin/is-ci.ps1
@@ -1101,3 +1101,6 @@ node_modules/cors/LICENSE
 node_modules/cors/lib/index.js
 node_modules/cors/HISTORY.md
 node_modules/cors/CONTRIBUTING.md
+.env
+.gitignore
+.gitignore
