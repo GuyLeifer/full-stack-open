@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const baseUrl = 'http://localhost:8080/api/persons'
+
 function App() {
   const [book, setBook] = useState([]);
   const [name, setName] = useState();
   const [number, setNumber] = useState();
 
   const fetch = async () => {
-    const { data } = await axios.get('/api/persons')
+    const { data } = await axios.get(baseUrl)
     setBook(data);
   }
 
@@ -15,17 +17,17 @@ function App() {
     fetch();
   }, [])
 
-  const handleDelete = (e) => {
-    axios.delete(`/api/persons/${e.target.id}`)
-    fetch();
+  const handleDelete = async (e) => {
+    await axios.delete(`/api/persons/${e.target.id}`)
+    await fetch();
   }
 
   const handleSubmit = async () => {
-    await axios.post('/api/persons', {
+    await axios.post(baseUrl, {
       name, 
       number
     })
-    fetch();
+    await fetch();
   }
 
   return (
