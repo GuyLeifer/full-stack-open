@@ -1,0 +1,27 @@
+{
+  "name": "full-stack-open",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuyLeifer/full-stack-open.git"
+  },
+  "author": "Guy Leifer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GuyLeifer/full-stack-open/issues"
+  },
+  "homepage": "https://github.com/GuyLeifer/full-stack-open#readme"
+}
