@@ -57,6 +57,42 @@ app.get('/info', (req, res) => {
     response.status(204).end()
   })
   
+  const generateId = () => {
+    const maxId = persons.length > 0
+      ? Math.max(...persons.map(n => n.id))
+      : 0
+    return maxId + 1
+  }
+  
+  app.post('/api/persons', (request, response) => {
+    const body = request.body
+  
+    if (!body.name) {
+      return response.status(400).json({ 
+        error: 'name missing' 
+      })
+    }
+    if (persons.prototype.find((person) => person.name === body.name)) {
+      return response.status(400).json({ 
+        error: 'name already exists' 
+      })
+    }
+    if (!body.number) {
+      return response.status(400).json({ 
+        error: 'number missing' 
+      })
+    }
+  
+    const person = {
+      name: body.name,
+      number: body.number,
+      id: generateId(),
+    }
+  
+    persons = persons.concat(person)
+  
+    response.json(person)
+  })
 
 
 const PORT = 3000
