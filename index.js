@@ -57,9 +57,15 @@ let persons = [
     },
   ]
 
-// app.get('/', (req, res) => {
-//   res.send('Welcome To Local Host Port 3001!')
-// })
+app.get('/', (req, res) => {
+  res.send('Welcome To Local Host Port 3001!')
+})
+
+app.get('/info', (req, res) => {
+    const p = `Phonebook has info for ${Contact.length} people`;
+    const date = new Date();
+    res.send(p + " " + date)
+})
 
 app.get('/api/persons', (req, res) => {
   Contact.find({}).then(result => {
@@ -68,68 +74,95 @@ app.get('/api/persons', (req, res) => {
   })
 })
 
-app.get('/info', (req, res) => {
-    const p = `Phonebook has info for ${Contact.length} people`;
-    const date = new Date();
-    res.send(p + " " + date)
-  })
-
-  app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find((person) => person.id === id)
-
+app.get('/api/persons/:id', (request, response) => {
+  Contact.findById(request.params.id)
+  .then(person => {
     if (person) {
-        res.send(person)
-    }
-    else {
-        res.status(404).end()
+      response.json(person)
+    } else {
+      response.status(404).end()
     }
   })
+  .catch(error => {
+    console.log(error)
+    response.status(500).end()
+  })
+})
 
-  app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
-    response.send(persons)
-    response.status(204).end()
-  })
-  
-  const generateId = () => {
-    const maxId = persons.length > 0
-      ? Math.max(...persons.map(n => n.id))
-      : 0
-    return maxId + 1
-  }
-  
-  app.post('/api/persons', (request, response) => {
+
+app.delete('/api/persons/:id', (request, response, next) => {
+  Contact.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+
+  app.put('/api/persons/:id', (request, response, next) => {
     const body = request.body
-  
-    if (!body.name) {
-      return response.status(400).json({ 
-        error: 'name missing' 
-      })
-    }
-    if (persons.find((person) => person.name === body.name)) {
-      return response.status(400).json({ 
-        error: 'name already exists' 
-      })
-    }
-    if (!body.number) {
-      return response.status(400).json({ 
-        error: 'number missing' 
-      })
-    }
   
     const person = {
       name: body.name,
-      number: body.number,
-      id: generateId(),
+      number: body.number
     }
   
-    persons = persons.concat(person)
-  
-    response.json(person)
+    Contact.findByIdAndUpdate(request.params.id, person, { new: true })
+      .then(updatedPerson => {
+        response.json(updatedPerson)
+      })
+      .catch(error => next(error))
   })
+  
+  // const generateId = () => {
+  //   const maxId = persons.length > 0
+  //     ? Math.max(...persons.map(n => n.id))
+  //     : 0
+  //   return maxId + 1
+  // }
 
+  const checkGetPostBody = (req, res) => {
+    const body = req.body
+    if (!body.name) {
+      return res.status(400).json({ error: 'the name field is missing' })
+    }
+    if (!body.number) {
+      return res.status(400).json({ error: 'the number field is missing' })
+    }
+    return body
+  }
+  
+  app.post('/api/persons', (req, res, next) => {
+    const body = checkGetPostBody(req, res)
+    // if (persons.find(i => i.name === body.name)) {
+    //   return res.status(400).json({ error: "the name must be unique" });
+    // }
+    const person = new Contact({
+      name: body.name,
+      number: body.number
+    })
+    person
+      .save()
+      .then(newPerson => {
+        res.json(newPerson.toJSON())
+      })
+      .catch(error => next(error))
+  })
+  
+  const errorHandler = (error, request, response, next) => {
+    console.log(error)
+  
+    if (error.name === 'CastError' && error.kind === 'ObjectId') {
+      return response.status(400).send({ error: 'malformed id' })
+    }
+  
+    if (error.name === 'ValidationError') {
+      return response.status(400).send({ error: error.message })
+    }
+  
+    next(error)
+  }
+  app.use(errorHandler)
 
   const PORT = process.env.PORT
   app.listen(PORT, () => {
